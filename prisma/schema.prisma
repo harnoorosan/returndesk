@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RequestStatus {
+  OPEN
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum ReturnReason {
+  DAMAGED
+  WRONG_ITEM
+  SIZE_ISSUE
+  NOT_AS_DESCRIBED
+  CHANGED_MIND
+}
+
+enum Resolution {
+  REFUND
+  REPLACEMENT
+  STORE_CREDIT
+}
+
+enum NoteKind {
+  AGENT
+  SYSTEM
+}
+
+/// A return or replacement raised by an agent. Rows are never hard-deleted.
+model ReturnRequest {
+  id           String        @id @default(cuid())
+  reference    String        @unique @db.VarChar(20)
+  customerName String        @map("customer_name") @db.VarChar(120)
+  contact      String        @db.VarChar(160)
+  orderNumber  String        @map("order_number") @db.VarChar(40)
+  itemName     String        @map("item_name") @db.VarChar(160)
+  orderKey     String        @map("order_key") @db.VarChar(40)
+  itemKey      String        @map("item_key") @db.VarChar(160)
+  /// Present only while the request is still live (Open, In Review, Approved).
+  /// Cleared on Rejected and Completed. A unique nullable column lets a later
+  /// request reuse the same order and item, and Postgres allows many nulls.
+  livePair     String?       @unique @map("live_pair") @db.VarChar(220)
+  quantity     Int
+  reason       ReturnReason
+  status       RequestStatus @default(OPEN)
+  resolution   Resolution?
+  refundAmount Decimal?      @map("refund_amount") @db.Decimal(12, 2)
+  removedAt    DateTime?     @map("removed_at")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  notes        Note[]
+
+  @@index([removedAt, createdAt])
+  @@index([removedAt, status])
+  @@index([removedAt, reason])
+  @@index([customerName])
+  @@index([orderNumber])
+  @@map("return_requests")
+}
+
+/// Append-only. The API has no update or delete path for notes.
+model Note {
+  id        String        @id @default(cuid())
+  requestId String        @map("request_id")
+  request   ReturnRequest @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  body      String        @db.VarChar(2000)
+  author    String        @db.VarChar(80)
+  kind      NoteKind      @default(AGENT)
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  @@index([requestId, createdAt])
+  @@map("notes")
+}

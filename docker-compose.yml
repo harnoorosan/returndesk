@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: returndesk-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: returndesk
+      POSTGRES_PASSWORD: returndesk
+      POSTGRES_DB: returndesk
+    ports:
+      - "5432:5432"
+    volumes:
+      - returndesk_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U returndesk -d returndesk"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  returndesk_pg:
