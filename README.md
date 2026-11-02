@@ -2,7 +2,7 @@
 
 A returns desk for a small online store. An agent raises a return or replacement, finds it among the others, moves it through a fixed lifecycle, leaves notes, and can take an open or rejected request off the desk without deleting the row.
 
-This repository runs locally. It is not deployed.
+The live desk is at https://returndesk-sepia.vercel.app. The same app also runs locally.
 
 ## Setup
 
@@ -123,10 +123,10 @@ The layout is a single column of cards with stacked filters, so it stays usable 
 - All five business rules enforced in the route handlers and backed by database constraints
 - Seed of 32 visible requests plus one hidden row
 - Docker Compose, migration, `.env.example`
+- Public deployment at https://returndesk-sepia.vercel.app
 
 ## Not done
 
-- Public deployment. This build was kept local on purpose.
 - Accounts, roles, or an audit log beyond the note timeline
 - Photos, email to the customer, or a warehouse integration
 
