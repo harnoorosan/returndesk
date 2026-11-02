@@ -130,4 +130,4 @@ The layout is a single column of cards with stacked filters, so it stays usable 
 - Accounts, roles, or an audit log beyond the note timeline
 - Photos, email to the customer, or a warehouse integration
 
-Hours spent: 8
+Hours spent: 12
